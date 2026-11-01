@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{box-sizing:border-box}img{max-width:100%}</style>
+<title>Harness 工程入门教程</title>
+</head>
+<body>
+<style>
+/* Layout: a quiet sidebar TOC + one 68ch reading column; sections are the 11 lessons. */
+:root {
+  --bg: #f5f7fa;        /* cool, slightly blue paper */
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5b6678;
+  --line: #d7dde7;
+  --accent: #0c6b73;    /* deep teal */
+  --accent-soft: #dcecee;
+  --code-bg: #eceff4;
+  --code-fg: #22303f;
+  --th-bg: #eef2f6;
+  --font-sans: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, "PingFang SC", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419; --surface: #151b22; --fg: #e4e9ef; --muted: #98a4b4; --line: #2a333f;
+    --accent: #5cc4c9; --accent-soft: #15353a; --code-bg: #1a222b; --code-fg: #dfe6ee; --th-bg: #1b2430;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419; --surface: #151b22; --fg: #e4e9ef; --muted: #98a4b4; --line: #2a333f;
+  --accent: #5cc4c9; --accent-soft: #15353a; --code-bg: #1a222b; --code-fg: #dfe6ee; --th-bg: #1b2430;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-sans);
+  font-size: 16px; line-height: 1.75; margin: 0;
+  padding-block: 0 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); overflow-wrap: anywhere; }
+a:hover, a:focus-visible { border-bottom-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding-block: 12px; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.topbar .name { font-weight: 600; letter-spacing: .01em; }
+.topbar .meta { color: var(--muted); font-size: .85rem; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding-top: 28px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px); align-self: start; max-height: calc(100vh - 90px); overflow: auto; font-size: .875rem; }
+nav.toc .toc-title { text-transform: uppercase; letter-spacing: .12em; font-size: .7rem; color: var(--muted); margin: 0 0 10px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+nav.toc a { display: grid; grid-template-columns: 3.6em 1fr; gap: 6px; padding: 5px 8px; border: 0; border-radius: 4px; color: var(--fg); line-height: 1.35; }
+nav.toc a:hover { background: var(--accent-soft); }
+.toc-eyebrow { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .75rem; }
+main { min-width: 0; max-width: 68ch; }
+details.toc-mobile { display: none; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; margin-bottom: 20px; background: var(--surface); }
+details.toc-mobile summary { cursor: pointer; font-weight: 500; }
+details.toc-mobile ol { list-style: none; padding: 8px 0 0; margin: 0; display: grid; gap: 4px; font-size: .9rem; }
+details.toc-mobile a { border: 0; color: var(--fg); }
+h3 { font-size: 1.3rem; line-height: 1.35; font-weight: 600; margin: 0 0 16px; text-wrap: balance; display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+section { padding-top: 8px; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0 32px; }
+p { margin: 0 0 14px; }
+strong { font-weight: 600; }
+ul, ol { margin: 0 0 16px; padding-left: 1.4em; }
+li { margin-bottom: 6px; }
+li::marker { color: var(--muted); }
+code { font-family: var(--font-mono); font-size: .86em; background: var(--code-bg); color: var(--code-fg); padding: .1em .35em; border-radius: 4px; }
+pre.code { background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px; font-size: .84rem; line-height: 1.6; position: relative; }
+pre.code code { background: none; padding: 0; font-size: inherit; color: inherit; }
+pre.code[data-lang]:not([data-lang=""])::before { content: attr(data-lang); position: absolute; top: 6px; right: 10px; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.table-wrap { overflow-x: auto; margin: 0 0 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.5; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--th-bg); font-weight: 600; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td { font-variant-numeric: tabular-nums; }
+.lede { color: var(--muted); font-size: .95rem; margin-bottom: 24px; }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  nav.toc { display: none; }
+  details.toc-mobile { display: block; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+<div class="topbar"><span class="name">Harness 工程入门教程</span><span class="meta">从零开始 · 11 课 · 资料截至 2026-10</span></div>
+<div class="wrap">
+<nav class="toc" aria-label="目录"><p class="toc-title">目录</p><ol><li><a href="#s1"><span class="toc-eyebrow">第 0 课</span><span>先把名字搞清楚：什么是 Harness</span></a></li><li><a href="#s2"><span class="toc-eyebrow">第 1 课</span><span>一个 Agent 的最小骨架：循环</span></a></li><li><a href="#s3"><span class="toc-eyebrow">第 2 课</span><span>给它手和眼睛：工具设计（ACI）</span></a></li><li><a href="#s4"><span class="toc-eyebrow">第 3 课</span><span>告诉它规矩：系统提示与 CLAUDE.md / AGENTS.md</span></a></li><li><a href="#s5"><span class="toc-eyebrow">第 4 课</span><span>别让它闯祸：权限、确认与沙箱</span></a></li><li><a href="#s6"><span class="toc-eyebrow">第 5 课</span><span>上下文是最稀缺的资源</span></a></li><li><a href="#s7"><span class="toc-eyebrow">第 6 课</span><span>什么时候算做完：停止条件与验证</span></a></li><li><a href="#s8"><span class="toc-eyebrow">第 7 课</span><span>你怎么知道改好了：评测</span></a></li><li><a href="#s9"><span class="toc-eyebrow">第 8 课</span><span>长任务与多代理：进阶模式</span></a></li><li><a href="#s10"><span class="toc-eyebrow">第 9 课</span><span>把这些对照到你每天用的工具</span></a></li><li><a href="#s11"><span class="toc-eyebrow">第 10 课</span><span>心法与反模式</span></a></li><li><a href="#s12"><span class="toc-eyebrow"></span><span>推荐学习路径与资料</span></a></li></ol></nav>
+<main>
+<details class="toc-mobile"><summary>目录</summary><ol><li><a href="#s1"><span class="toc-eyebrow">第 0 课</span><span>先把名字搞清楚：什么是 Harness</span></a></li><li><a href="#s2"><span class="toc-eyebrow">第 1 课</span><span>一个 Agent 的最小骨架：循环</span></a></li><li><a href="#s3"><span class="toc-eyebrow">第 2 课</span><span>给它手和眼睛：工具设计（ACI）</span></a></li><li><a href="#s4"><span class="toc-eyebrow">第 3 课</span><span>告诉它规矩：系统提示与 CLAUDE.md / AGENTS.md</span></a></li><li><a href="#s5"><span class="toc-eyebrow">第 4 课</span><span>别让它闯祸：权限、确认与沙箱</span></a></li><li><a href="#s6"><span class="toc-eyebrow">第 5 课</span><span>上下文是最稀缺的资源</span></a></li><li><a href="#s7"><span class="toc-eyebrow">第 6 课</span><span>什么时候算做完：停止条件与验证</span></a></li><li><a href="#s8"><span class="toc-eyebrow">第 7 课</span><span>你怎么知道改好了：评测</span></a></li><li><a href="#s9"><span class="toc-eyebrow">第 8 课</span><span>长任务与多代理：进阶模式</span></a></li><li><a href="#s10"><span class="toc-eyebrow">第 9 课</span><span>把这些对照到你每天用的工具</span></a></li><li><a href="#s11"><span class="toc-eyebrow">第 10 课</span><span>心法与反模式</span></a></li><li><a href="#s12"><span class="toc-eyebrow"></span><span>推荐学习路径与资料</span></a></li></ol></details>
+<p class="lede">配套代码（mini_harness.py、mini_eval.py、示例任务）在本地目录 Documents/harness工程入门教程/ 下。</p>
+<p><strong>这份教程是什么，给谁看</strong></p>
+<p>Harness 工程（Harness Engineering）是 2026 年初才被叫出名字、但从 2024 年起就在实践的一门手艺：模型之外的一切，决定了一个 AI Agent 到底能不能把活干完。本教程假设你会写一点 Python、用过 ChatGPT 或 Claude 这类聊天产品，但从没自己写过 agent。读完并做完练习，你会：</p>
+<ol><li>说清楚 harness 是什么、和 prompt engineering / context engineering 的关系、为什么 2026 年所有人都在谈它。</li><li>亲手写一个 200 行左右的 coding agent harness 并跑起来。</li><li>知道 Claude Code、Codex CLI 这类产品里的每个功能分别在解决哪一类 harness 问题。</li><li>掌握评测和迭代 harness 的方法，也就是这门手艺的日常。</li></ol>
+<p>配套文件在同一目录：<code>mini_harness.py</code>（完整可运行的最小 harness）、<code>mini_eval.py</code>（评测脚本）、<code>tasks/fix_add/</code>（一个示例任务，含起始仓库、任务描述和 grader）。资料截至 2026 年 10 月，关键结论都给了出处，文末有阅读清单。</p>
+<p><strong>阅读路线</strong>：第 0 课讲概念；第 1 到 7 课边学边写代码，每课对应 <code>mini_harness.py</code> 里的一段；第 8 到 10 课讲进阶模式、日常工具对照和心法。只想动手的可以直接从第 1 课开始，回头再补第 0 课。</p>
+<hr>
+<section id="s1"><h3><span class="eyebrow">第 0 课</span><span class="h3-text">先把名字搞清楚：什么是 Harness</span></h3>
+<p><strong>词源与比喻</strong>。Harness 原意是马具：缰绳、马鞍、嚼子。中文圈的说法是"Agent 是牛马，Harness 是缰绳"。它和汽车行业的"线束（wire harness）"没有任何关系，搜中文资料时别被带偏。中文媒体一般直接写"Harness 工程"，偶尔意译为"脚手架"或"运行框架"。</p>
+<p><strong>一句话定义</strong>。Agent = Model + Harness。模型负责思考，harness 是模型之外的一切：调用模型的那个循环、它能用的工具、系统提示词和项目说明文件、上下文怎么增删、权限和沙箱、记忆和状态、怎么判断做完了。Anthropic 官方文档的说法是"围绕模型、提供工具并管理模型所见上下文的那一层"；Thoughtworks 的 Birgitta Böckeler 说得更直白："AI agent 里除了模型之外的一切"；LangChain 的口号是 "If you're not the model, you're the harness"。</p>
+<p>实际使用中这个词有三个粒度，读文章时要分清：</p>
+<ul><li>窄义，运行时：调模型、分发工具调用、决定何时停的那段代码（Hugging Face 术语表、arXiv 2609.00006 对 11 个开源 harness 的源码研究用这个意思）。</li><li>广义，模型之外的一切（Böckeler、Addy Osmani、LangChain）。</li><li>仓库级：OpenAI 那篇博客的用法，harness 还包括代码仓库自身的文档结构、自定义 linter、结构化测试、可观测性，也就是 agent "生活"的整个环境。</li></ul>
+<p>还有一个容易混淆的点：Terminal-Bench 排行榜的 "agent" 列（Claude Code、Codex CLI、Terminus 2）就是别处说的 harness，而它自己说的 "harness"（Harbor）指评测框架。</p>
+<p><strong>时间线：为什么 2026 年突然都在谈它</strong></p>
+<div class="table-wrap"><table><thead><tr><th>时间</th><th>事件</th></tr></thead><tbody><tr><td>2024-05</td><td>SWE-agent 论文提出 agent-computer interface（ACI）：给模型专门设计的界面能显著提高 SWE-bench 分数</td></tr><tr><td>2024-12</td><td>Anthropic《Building effective agents》：区分 workflow 与 agent，强调"像打磨 HCI 一样打磨 ACI"</td></tr><tr><td>2025-07</td><td>Manus《Context Engineering for AI Agents》：KV 缓存命中率、append-only、文件系统当记忆</td></tr><tr><td>2025-09</td><td>Anthropic《Effective context engineering》：上下文是边际收益递减的有限资源</td></tr><tr><td>2025-11</td><td>Anthropic《Effective harnesses for long-running agents》：harness 作为名词进了标题</td></tr><tr><td>2026-02-05</td><td>Mitchell Hashimoto 在《My AI Adoption Journey》里说他开始把这套做法叫 "harness engineering"</td></tr><tr><td>2026-02-11</td><td>OpenAI《Harness engineering: leveraging Codex in an agent-first world》：3 人团队 5 个月 0 行手写代码、约 100 万行、约 1500 个 PR。这篇让词火了</td></tr><tr><td>2026-03 至 04</td><td>Anthropic《Harness design for long-running apps》、martinfowler.com、LangChain、Addy Osmani 跟进；"harness 是产品"与"模型会吃掉 harness"的争论公开化</td></tr></tbody></table></div>
+<p>Hashimoto 给的定义最适合初学者记住：每次发现 agent 犯了一个错，就做一个工程化的方案，让它永远不再犯同样的错。方案只有两种形式：更好的隐式提示（AGENTS.md 之类），或者真正写出来的工具。</p>
+<p><strong>和 prompt engineering、context engineering 的关系</strong>。多数 2026 年的文章把三者嵌套：</p>
+<ul><li>Prompt engineering：怎么措辞。作用对象是一次交互里的文字。</li><li>Context engineering：每一步模型窗口里到底放哪些 token（系统提示、工具定义、历史、检索结果、笔记）。</li><li>Harness engineering：产生这些 token 的代码本身，再加上循环、工具、权限、状态、验证。</li></ul>
+<p>Osmani 的说法是"harness 主要是 context engineering 的投递机制"。Böckeler 反过来把 harness 工程放在 context engineering 之内，属少数用法。Karpathy 2026 年提的 "agentic engineering" 指人类通过 agent 做工程这件事本身，harness 工程是其中一项技能。</p>
+<p><strong>为什么值得学：证据</strong>。同一个模型、换一个 harness，分数差别可以很大：</p>
+<div class="table-wrap"><table><thead><tr><th>场景</th><th>同一模型下的差异</th><th>来源</th></tr></thead><tbody><tr><td>SWE-bench Lite，GPT-4 Turbo（2024）</td><td>纯 shell 11.0% → 带 ACI 的 SWE-agent 18.0%</td><td>SWE-agent 论文</td></tr><tr><td>aider 的"偷懒"基准，GPT-4 Turbo（2023-12）</td><td>SEARCH/REPLACE 格式 20% → unified diff 61%，只改了编辑格式</td><td>aider 博客</td></tr><tr><td>SWE-bench Verified Mini，Claude Sonnet 4.5</td><td>HAL Generalist 34% vs SWE-agent 68%</td><td>arXiv 2605.23950 汇总 HAL 数据</td></tr><tr><td>Terminal-Bench 2.0，GPT-5.2（2026-01）</td><td>中性 harness Terminus 2 54.0% vs Codex CLI 62.9%</td><td>Terminal-Bench 2.0 论文</td></tr><tr><td>Terminal-Bench 2.0，LangChain 固定模型</td><td>52.8 → 66.5，只改 harness</td><td>Vivek Trivedy</td></tr><tr><td>Tau-Bench Retail，GPT-5</td><td>73.9 → 78.2，只是在工具调用之间保留推理内容</td><td>OpenAI GPT-5 prompting guide</td></tr></tbody></table></div>
+<p><strong>也要知道反方</strong>。几件事同样有证据：</p>
+<ul><li>好 harness 之间差距不大。ICML 2026 的 "Scaffold Effect" 研究：同一模型在 Goose / OpenCode / OpenHands 之间通过率差 0 到 8 个百分点，但消耗的 token 相差最多 40 倍。Terminal-Bench 2.0 作者的结论是"模型选择通常比 scaffold 更重要"。</li><li>强模型需要的 harness 更少。约 100 行 Python、只有 bash 一个工具的 mini-SWE-agent 在 SWE-bench Verified 上超过 74%；在 Terminal-Bench 2.0 上用 Sonnet 4.5 得 42.5%，和同模型的 Claude Code（40.1%）持平。</li><li>组件会过期。Anthropic Labs 2026 年 3 月的原话：harness 里每个组件都编码了一个"模型自己做不到"的假设。Sonnet 4.5 需要的上下文重置，到 Opus 4.5 就整个删掉了。Noam Brown 的立场是 scaffold 终将被推理模型取代。</li></ul>
+<p>把两边合起来看：harness 的价值主要在抬高下限、降低成本、长任务和真实仓库场景；它的具体内容有半衰期，但"模型和世界之间需要一层"这个角色不会消失。所以学 harness 工程，重点是学方法（发现失败、定位缺失的能力、机械化地堵上、评测、随模型升级做减法），而不是背某个固定架构。</p>
+<p><strong>练习</strong>：用自己的话向同事解释 harness，并举一个"同模型不同 harness 分数不同"的例子。</p>
+<hr>
+</section>
+<section id="s2"><h3><span class="eyebrow">第 1 课</span><span class="h3-text">一个 Agent 的最小骨架：循环</span></h3>
+<p>Thorsten Ball 2025 年 4 月《How to Build an Agent》的名句："It's an LLM, a loop, and enough tokens." 一个 agent 本质上是：把对话历史发给模型；模型要么回答，要么说"我要调用某个工具"；你执行工具，把结果追加到历史，再发一次；直到模型不再要工具。</p>
+<p><strong>协议要点</strong>（Claude Messages API，2026 年 10 月版本）</p>
+<ul><li>工具定义：<code>{name, description, input_schema}</code>，<code>input_schema</code> 是 JSON Schema。</li><li>模型返回的 <code>stop_reason</code> 为 <code>tool_use</code> 时，<code>content</code> 里有一个或多个 <code>tool_use</code> 块，每块有 <code>id</code>、<code>name</code>、<code>input</code>（已经是 dict，不用再解析）。</li><li>把模型的整段 <code>content</code> 原样追加为 assistant 消息，然后追加一条 user 消息，内容是 <code>tool_result</code> 块列表：<code>{type: "tool_result", tool_use_id, content, is_error?}</code>。</li><li>并行调用时所有 <code>tool_result</code> 必须放在同一条 user 消息里，且排在任何文本之前，否则 400。拆成多条消息会"悄悄训练模型不再并行调用"。</li><li>工具失败不要吞掉，返回 <code>is_error: true</code> 和一段"错在哪、下一步试什么"的说明，模型会自行重试两三次。</li><li>其他 stop_reason 要处理：<code>end_turn</code>（做完了）、<code>max_tokens</code>（输出被截断，最后一块可能是残缺的 tool_use，加大 max_tokens 重试）、<code>refusal</code>、<code>model_context_window_exceeded</code>。</li><li>模型 id：<code>claude-opus-5-5</code>（官方推荐默认）、<code>claude-sonnet-5-5</code>、<code>claude-haiku-5-5</code>（便宜，练习用）、<code>claude-fable-5-1</code>。5.5 代模型不支持强制 <code>tool_choice: any/tool</code>，用 <code>auto</code> 加提示词措辞。</li></ul>
+<p><strong>最小循环</strong>（<code>mini_harness.py</code> 的 <code>run()</code> 去掉日志和验证后的核心）</p>
+<pre class="code" data-lang="python"><code>def run(task):
+    client = anthropic.Anthropic()
+    system = build_system()                       # 只构建一次
+    messages = [{"role": "user", "content": task}]
+    for step in range(1, MAX_STEPS + 1):          # 铁律 2: 有上限
+        r = client.messages.create(model=MODEL, max_tokens=8000,
+                                   system=system, tools=TOOLS, messages=messages)
+        if r.stop_reason == "end_turn":
+            return "".join(b.text for b in r.content if b.type == "text")
+        if r.stop_reason != "tool_use":
+            raise RuntimeError(r.stop_reason)
+        results = []
+        for block in r.content:
+            if block.type != "tool_use":
+                continue
+            try:
+                out = DISPATCH[block.name](**block.input)      # 工具内部已截断
+                results.append({"type": "tool_result", "tool_use_id": block.id, "content": out})
+            except Exception as e:                             # 错误回灌, 不吞
+                results.append({"type": "tool_result", "tool_use_id": block.id,
+                                "content": f"{type(e).__name__}: {e}", "is_error": True})
+        messages.append({"role": "assistant", "content": r.content})   # 铁律 1: 原样追加
+        messages.append({"role": "user", "content": results})          # 同一条消息
+    raise RuntimeError("step limit reached")</code></pre>
+<p>三条铁律现在就养成习惯：</p>
+<ol><li>历史只追加，不回头修改。原因见第 5 课（缓存）和第 6 课。</li><li>必须有步数上限。官方文档的参考实现用 <code>MAX_STEPS = 20</code>。</li><li>工具结果在进入 <code>messages</code> 之前就截断，而不是事后删历史。</li></ol>
+<p>SDK 还提供了 tool runner（<code>@beta_tool</code> 装饰器加 <code>client.beta.messages.tool_runner(...).until_done()</code>，带 <code>max_iterations</code>），可以把循环折叠掉。先手写一遍再用它，否则遇到 400 你不知道是哪条规则被破坏了。</p>
+<p>跑起来：</p>
+<pre class="code" data-lang="bash"><code>pip install anthropic pytest
+export ANTHROPIC_API_KEY=...
+cd harness工程入门教程
+cp -r tasks/fix_add/repo /tmp/fix_add &amp;&amp; python mini_harness.py "$(cat tasks/fix_add/prompt.txt)" --workdir /tmp/fix_add</code></pre>
+<p><strong>练习</strong>：只保留 <code>read_file</code> 一个工具，让模型总结某个文件。打开 <code>trajectory.jsonl</code>，看每一步的 <code>stop_reason</code> 和 <code>usage</code>。</p>
+<hr>
+</section>
+<section id="s3"><h3><span class="eyebrow">第 2 课</span><span class="h3-text">给它手和眼睛：工具设计（ACI）</span></h3>
+<p>SWE-agent 论文把这件事叫 agent-computer interface：模型是你的"用户"，界面要为它设计。他们在 SWE-bench Lite 上用 GPT-4 Turbo 做的消融实验（基线 18.0%）值得背下来：</p>
+<div class="table-wrap"><table><thead><tr><th>改动</th><th>分数</th><th>说明</th></tr></thead><tbody><tr><td>编辑命令不带 linter 校验</td><td>15.0</td><td>语法错误没有即时反馈</td></tr><tr><td>完全没有编辑命令</td><td>10.3</td><td>影响最大</td></tr><tr><td>搜索返回原始长列表而非摘要</td><td>12.0</td><td>比完全没有搜索（15.7）还差</td></tr><tr><td>文件查看窗口 30 行 / 整个文件</td><td>14.3 / 12.7</td><td>100 行窗口最好</td></tr><tr><td>保留全部历史而非最近 5 条观察</td><td>15.0</td><td>上下文越多越差</td></tr></tbody></table></div>
+<p>由此得到四条设计原则：动作简单、选项少、文档短；把常用操作合并成少数紧凑动作；反馈信息量大但简洁；用 linter 一类护栏让 agent 能快速发现并纠正错误。</p>
+<p><strong>我们的四个工具及设计理由</strong>（完整实现见 <code>mini_harness.py</code>）</p>
+<ul><li><code>read_file(path, offset, limit)</code>：返回带行号的文本，默认 200 行，并提示"共 N 行，用 offset=... 继续"。行号让 <code>edit_file</code> 能精确定位；分页是为了上下文。</li><li><code>list_files(pattern)</code>：跳过隐藏目录、<code>node_modules</code>、<code>__pycache__</code>，最多 200 条。</li><li><code>edit_file(path, old_string, new_string)</code>：<code>old_string</code> 必须恰好匹配一次，否则报错并提示"多复制几行上下文"；成功后返回 unified diff 供模型自检。Ball 原文里有个经典 bug：描述说只匹配一次，代码却 replace all。</li><li><code>run_command(command, timeout)</code>：合并 stdout/stderr，返回 exit code；超时杀整个进程组；输出超过 1 万字符保留头尾各 5 千；环境里设 <code>PAGER=cat</code> 防止卡在分页器。</li></ul>
+<p>所有路径都经过 <code>_resolve()</code>，不允许逃出工作目录。</p>
+<p><strong>Anthropic 的工具原则</strong>（来自《Building effective agents》和《Writing effective tools for agents》）</p>
+<ul><li>Poka-yoke：把参数改成不容易用错的形式。他们的 SWE-bench agent 老用错相对路径，于是改成强制绝对路径。</li><li>描述要像写给新同事：参数名用 <code>user_id</code> 而不是 <code>user</code>；工具之间功能不重叠。"如果人类工程师说不清该用哪个工具，模型也会困惑。"</li><li>返回有意义的内容：返回 <code>name</code> 而不是 <code>uuid</code>；需要时提供 <code>response_format: concise|detailed</code>，他们测到简洁格式只有详细格式三分之一的 token。</li><li>工具数量不是越多越好。OpenAI 的指南：15 个以上边界清晰的工具没问题，10 个以下但相互重叠就会出事。Claude Code 每个工具结果默认上限 2.5 万 token。</li><li>他们花在优化工具上的时间比优化整体 prompt 还多。</li></ul>
+<p><strong>bash-only 的反面教材</strong>。mini-SWE-agent 只给一个 bash 工具就能超过 74%；2026 年 9 月的研究（arXiv 2609.20804）也发现 bash 能力强的模型用 bash-only 接口效果好且更便宜，预定义工具主要帮助 bash 弱的模型。实践建议：先用 bash 覆盖面，当你需要对某类动作做拦截、渲染、审计或并行时，再把它提升为专用工具。<code>send_email</code> 可以被拦截，<code>bash -c "curl -X POST ..."</code> 不行。</p>
+<p><strong>练习</strong>：把 <code>edit_file</code> 的唯一匹配检查去掉，给模型一个有重复代码的文件，看它会改坏什么。</p>
+<hr>
+</section>
+<section id="s4"><h3><span class="eyebrow">第 3 课</span><span class="h3-text">告诉它规矩：系统提示与 CLAUDE.md / AGENTS.md</span></h3>
+<p><strong>系统提示的"合适海拔"</strong>。Anthropic 的建议：介于"脆弱的 if-else 流程"和"空泛的指导"之间；最小但不等于短；在最好的模型上从最小集合开始，根据观察到的失败逐条增加。aider 2023 年测过"情绪化激励"（"用户是盲人"、"给 2000 美元小费"），结果反而降分。</p>
+<p><strong>项目说明文件</strong>。CLAUDE.md（Claude Code）和 AGENTS.md（Codex、Cursor、Aider 等 6 万多个项目通用的开放格式，由 Linux 基金会下的 Agentic AI Foundation 维护）是同一个思路：仓库里一份给 agent 看的 README，每次会话自动加载。</p>
+<ul><li>放什么：模型猜不到的构建和测试命令、与默认不同的代码风格、仓库礼仪、架构决策、环境坑。</li><li>不放什么：读代码就能知道的事、标准约定、详细 API 文档、经常变的信息、教程。</li><li>判断标准："删掉这条，agent 会不会犯错？"</li><li>长度：Claude Code 建议每个文件 200 行以内，"臃肿的 CLAUDE.md 会让 Claude 忽略你真正的指令"；Codex 把所有 AGENTS.md 拼起来后截断到 32 KiB；OpenAI 内部那个百万行仓库的 AGENTS.md 只有约 100 行。</li><li>分层：全局（<code>~/.claude</code> 或 <code>~/.codex</code>）→ 仓库根 → 子目录，越靠近工作目录的越后加载、优先级越高。</li></ul>
+<p><strong>OpenAI 的"地图不是手册"</strong>。他们试过一个巨大的 AGENTS.md，失败原因四条：上下文稀缺，巨型文件挤掉任务和代码；什么都重要等于什么都不重要；立刻过时，变成"陈旧规则的坟场"；无法机械校验。解法是 AGENTS.md 只做目录，指向 <code>docs/</code> 里结构化的设计文档、架构地图、质量评级、执行计划，再用 linter 和 CI 保证文档互链和新鲜，另外跑一个定期的"文档园丁"agent 清理过时内容。</p>
+<p><strong>关键区分：建议 vs 强制</strong>。CLAUDE.md、skills、系统提示都是建议，模型可以不听。Claude Code 文档原话："CLAUDE.md 里写'不要编辑 .env'是请求，不是保证；一个阻止编辑的 PreToolUse hook 才是强制。"第 4 课讲强制。</p>
+<p>我们的加载方式：</p>
+<pre class="code" data-lang="python"><code>def build_system():
+    text = ("You are a careful coding agent working inside the workspace ...\n"
+            "Rules:\n- Read a file before you edit it. ...\n"
+            "- Never edit or delete tests to make them pass.\n"
+            "- Run the test suite before claiming the task is done ...")
+    for name in ("AGENTS.md", "CLAUDE.md"):
+        f = WORKDIR / name
+        if f.exists():
+            text += f'\n\n&lt;project_instructions source="{name}"&gt;\n{f.read_text()[:20_000]}\n&lt;/project_instructions&gt;'
+            break
+    return [{"type": "text", "text": text, "cache_control": {"type": "ephemeral"}}]</code></pre>
+<p><code>system</code> 只在任务开始时构建一次，循环中不再变动，否则前缀缓存全部失效。</p>
+<p><strong>练习</strong>：给示例仓库的 <code>AGENTS.md</code> 加一条模型猜不到的规则（比如"提交前运行 ruff"），跑同一任务，看轨迹里它有没有照做；再删掉这条，比较差异。</p>
+<hr>
+</section>
+<section id="s5"><h3><span class="eyebrow">第 4 课</span><span class="h3-text">别让它闯祸：权限、确认与沙箱</span></h3>
+<p>三个层次，由浅入深：</p>
+<ol><li>进程级：工作目录限制、只读命令白名单、其余命令先问人、超时。<code>mini_harness.py</code> 实现了这一层。</li><li>容器级：把 <code>subprocess</code> 换成 <code>docker exec</code>，每个任务一个干净镜像。mini-SWE-agent 就是这么切换的。</li><li>操作系统级：macOS Seatbelt、Linux bubblewrap 加 seccomp。Claude Code 和 Codex CLI 都用这套：只允许写当前目录，网络默认关闭或经代理按域名放行，<code>.git</code>、<code>.claude</code>、<code>.codex</code>、<code>.aws</code> 等路径永不自动放行。Anthropic 开源了 sandbox-runtime，他们内部数据是沙箱让权限弹窗减少 84%。</li></ol>
+<p><strong>为什么弹窗不是答案</strong>。Anthropic 的数据：用户对手动权限提示 93% 都点了同意。于是他们做了 auto mode，用一个独立分类器模型审每个会改状态的动作，连续拦 3 次或累计 20 次就退回人工确认。分类器看不到工具结果，所以网页或文件里的恶意文本无法直接操纵它。</p>
+<p><strong>Hooks 是强制机制</strong>。Claude Code 和 Codex CLI 都有生命周期钩子：PreToolUse、PostToolUse、Stop、PreCompact、SessionStart 等。约定一致：退出码 0 放行，退出码 2 阻止并把 stderr 作为理由回灌给模型。Claude Code 文档的建议："任何必须每次都发生、零例外的事，写成 hook。"hook 不占上下文。</p>
+<p><strong>我们的实现</strong>：</p>
+<pre class="code" data-lang="python"><code>SAFE_PREFIXES = ("ls", "cat ", "head ", "tail ", "wc ", "find ", "grep ", "rg ",
+                 "git status", "git diff", "git log", "pytest", "python -m pytest")
+
+def gate(command):
+    if os.environ.get("HARNESS_YOLO"):          # 只在一次性容器里打开
+        return
+    if command.strip().startswith(SAFE_PREFIXES):
+        return
+    if input(f"[permission] run `{command}` ? [y/N] ").strip().lower() != "y":
+        raise PermissionError("The user declined to run this command. "
+                              "Try a different approach or explain what you need and why.")</code></pre>
+<p>白名单只放只读命令；拒绝时返回给模型的不是异常栈，而是一句可执行的指令。注意白名单是基于前缀的粗筛，<code>cat x; rm -rf y</code> 这类拼接命令会漏过去，这正是为什么生产工具最终都走到了操作系统级沙箱。</p>
+<p><strong>练习</strong>：让 agent 执行删除目录的命令，确认被拦；再把该命令加进白名单，体会"白名单就是信任边界"。</p>
+<hr>
+</section>
+<section id="s6"><h3><span class="eyebrow">第 5 课</span><span class="h3-text">上下文是最稀缺的资源</span></h3>
+<p><strong>证据</strong></p>
+<ul><li>Chroma 2025 年 7 月测了 18 个模型：输入越长，即使是简单任务表现也下降；一个干扰项就有害，四个叠加更糟；LongMemEval 上 300 token 的聚焦输入显著好于 11.3 万 token 的全量输入。</li><li>"Lost in the Middle"（2023）：相关信息在开头或结尾时效果最好，在中间显著下降。</li><li>Anthropic 把这叫 context rot，根因是 n² 注意力加上长序列训练数据稀缺，所以上下文是"边际收益递减的有限资源"。Claude Code 文档说"大多数最佳实践都基于一个约束：上下文窗口填得很快，而且越满性能越差"。</li></ul>
+<p><strong>四种技术</strong>（按复杂度排序）</p>
+<ol><li>在工具层截断。进入 <code>messages</code> 之前就裁：输出头尾各 5 千字符；读文件分页；搜索限 100 条。2026 年 9 月的研究发现"规则截断先于 LLM 摘要"最省钱，而让被删内容可恢复的机制"模型很少用"。</li><li>压缩（compaction）。Claude Code 先清旧工具输出，再对话摘要，保留请求和关键代码片段，摘要后带上最近访问的 5 个文件；如果单个输出大到摘要后立刻又满，就停止自动压缩并报错而不是死循环。OpenHands 的 condenser 保留前 N 条和后 M 条事件，中间交给 LLM 摘要。Codex 用服务端 <code>/responses/compact</code>。</li><li>结构化笔记。把状态写到文件而不是留在窗口里：进度文件、todo、JSON 特性清单。Manus 的"复述"技巧是不断重写 <code>todo.md</code>，让目标始终出现在注意力最近的位置；一个任务平均 50 次工具调用，不复述就会跑偏。</li><li>子代理。子代理用自己的窗口干脏活，只返回 1000 到 2000 token 的摘要。Claude Code 的 Explore 子代理就是为此存在。</li></ol>
+<p><strong>Manus 的六条生产经验</strong>（2025-07，很多 harness 隐性规则的来源）</p>
+<ul><li>KV 缓存命中率是生产 agent 最重要的指标：缓存输入 0.30 美元/百万 token，未缓存 3 美元，差 10 倍；输入输出比约 100:1。</li><li>前缀必须稳定：系统提示里放一个精确到秒的时间戳就会把缓存全毁掉；序列化要确定性。</li><li>上下文只追加。</li><li>工具"屏蔽而不删除"：任务中途增删工具会打破缓存，还会让历史里引用了已删除工具的地方让模型困惑。</li><li>文件系统就是无限且持久的记忆；压缩要可恢复（删网页内容但留 URL）。</li><li>把错误留在上下文里。失败的动作和堆栈让模型更新信念；"错误恢复是真正 agent 行为最清晰的指标"。</li></ul>
+<p><strong>对应到代码</strong>：第 1 课的只追加、<code>truncate()</code>、每步把 <code>usage</code> 整个记进轨迹。Claude 的缓存规则：按 tools → system → messages 顺序做前缀匹配，必须完全一致；最短可缓存 512 token（5.5 代模型）；5 分钟 TTL，可选 1 小时；读价为基础价的 10%（Opus/Sonnet 5.5 为 5%，Fable 5.1 为 2.5%）。<code>usage</code> 里 <code>cache_read_input_tokens</code> 和 <code>cache_creation_input_tokens</code> 都是 0 就说明没命中。另外 2026 年 8 月 31 日之后创建的账号，API 会校验历史是否被改动过，改了直接 400，只追加不再只是优化而是硬要求。</p>
+<p><strong>练习</strong>：跑一个需要读大文件的任务，分别用 <code>limit=2000</code> 和 <code>limit=200</code>，比较轨迹里的总 token 和成本。</p>
+<hr>
+</section>
+<section id="s7"><h3><span class="eyebrow">第 6 课</span><span class="h3-text">什么时候算做完：停止条件与验证</span></h3>
+<p><strong>两类失败</strong>。一类是停不下来：死循环、反复读同一个文件、格式错误。另一类更隐蔽：过早宣布胜利。Anthropic 观察到 agent "看到一些进展就宣布项目完成"，或者只跑了单元测试、curl 一下就把特性标成通过；Terminal-Bench 的失败分类里有 "Premature Termination" 和 "Weak Verification"；Claude Code 文档的解释是"没有一个它能运行的检查时，'看起来做完了'是唯一的信号"。</p>
+<p><strong>硬上限</strong>（mini-SWE-agent 的默认值是很好的参考）：步数、费用（默认 3 美元）、墙钟时间、连续格式错误（3 次）。官方参考实现另加 <code>MAX_CONTINUATIONS = 5</code>。</p>
+<p><strong>把成功信号放到 agent 够不到的地方</strong>。所有有效做法都是同一个原理：</p>
+<ul><li>测试不能改。Anthropic 长任务 harness 的 prompt 原话："删除或修改测试是不可接受的。"2026 年的研究显示 80.2% 的 agent 自写测试缺乏有效断言；有 agent 把公开测试的期望输出预计算进查找表，公开集 97%、留出集 0%。</li><li>端到端验证。用浏览器自动化点一遍，而不是只看单测；OpenAI 让 Codex 修 bug 前后各录一段视频附在 PR 上。</li><li>做的人和判的人分开。Anthropic 的 generator/evaluator：独立的怀疑型评估者比让生成者自我批评"可处理得多"；Claude Code 文档建议用新上下文的子代理做对抗式审查，因为"模型不会偏袒自己刚写的代码"，同时提醒"被要求找问题的审查者通常都会报告一些问题"。</li><li>状态用 JSON 而不是 Markdown 存：模型更少乱改 JSON；特性清单里 agent 只能翻 <code>passes</code> 字段。</li></ul>
+<p><strong>我们的实现</strong>：<code>--require-tests</code> 开关。模型说做完时，如果轨迹里没有跑过 pytest，harness 回一句"你还没跑测试"，最多两次。这就是 Claude Code Stop hook 的玩具版：</p>
+<pre class="code" data-lang="python"><code>if r.stop_reason == "end_turn":
+    if require_tests and not ran_tests and nudges &lt; 2:
+        nudges += 1
+        messages.append({"role": "assistant", "content": r.content})
+        messages.append({"role": "user", "content": "[harness] You have not run the test suite yet. "
+                         "Run it with pytest, fix any failure, then give your final summary."})
+        continue
+    return ...</code></pre>
+<p>示例任务的 <code>check.py</code> 则演示了"把信号放在 agent 够不到的地方"：它在仓库外部运行，先比对测试文件有没有被改，再用自己的断言（含一个隐藏用例）检查行为。</p>
+<p><strong>练习</strong>：把 <code>tasks/fix_add/repo/calc.py</code> 里的 bug 改成更隐蔽的（比如只在负数时出错），关掉 <code>--require-tests</code>，看模型会不会宣布完成。</p>
+<hr>
+</section>
+<section id="s8"><h3><span class="eyebrow">第 7 课</span><span class="h3-text">你怎么知道改好了：评测</span></h3>
+<p>Anthropic《Demystifying evals for AI agents》（2026-01）的术语：task（输入加成功标准）、trial（一次尝试）、grader（打分逻辑）、transcript（完整轨迹）、outcome（最终环境状态，是"数据库里真的有这条预订"而不是"agent 说它订了"）。评测 agent 就是评测 harness 和模型的组合。</p>
+<p><strong>起步规则</strong></p>
+<ul><li>从真实失败里抽 20 到 50 个简单任务。好任务的标准：两位专家会给出同样的判决。</li><li>每次 trial 从干净环境开始（他们遇到过 agent 从上次 trial 的 git 历史里偷看答案）。</li><li>优先确定性 grader（测试、字符串匹配、状态检查），评结果不评路径；LLM 评委要给 "Unknown" 选项、用和被测 agent 不同的模型家族。</li><li>多跑几次。pass@k 是 k 次里至少一次成功，pass^k 是 k 次全成功。单次 75% 的任务，pass^3 只有 42%。</li><li>读轨迹。失败要"看起来公平"。他们有个案例：Opus 4.5 在 CORE-Bench 从 42% 到 95%，只是修了评分和任务描述的问题并换了限制更少的 scaffold。</li><li>费用和 token 是和通过率并列的坐标轴。</li></ul>
+<p><strong>我们的实现</strong>：<code>mini_eval.py</code> 加 <code>tasks/&lt;name&gt;/{repo/, prompt.txt, check.py}</code>。每个任务拷贝到临时目录跑 n 次，<code>check.py</code> 从仓库外部检查结果，每次 trial 写一行 JSONL（通过与否、步数、成本、轨迹路径），最后打印每个任务的 pass@1、pass^k、平均成本。成本按 <code>usage</code> 的四个字段乘价格表估算。</p>
+<pre class="code" data-lang="bash"><code>HARNESS_MODEL=claude-haiku-5-5 python mini_eval.py --trials 3</code></pre>
+<p><strong>练习</strong>：再写 4 个任务（改 bug、加功能、重构、写文档各一个），跑 3 次，找出 pass^3 最低的那个，读它的轨迹，然后只改 harness（不改模型、不改任务）把它修好。这一步就是 Hashimoto 定义的 harness 工程本身。</p>
+<hr>
+</section>
+<section id="s9"><h3><span class="eyebrow">第 8 课</span><span class="h3-text">长任务与多代理：进阶模式</span></h3>
+<p><strong>Anthropic 的长任务配方</strong>（2025-11，几乎只用文件加 git，不需要额外代码）</p>
+<ul><li>初始化会话写三样东西：<code>init.sh</code>（怎么启动应用）、<code>claude-progress.txt</code>（进度日志）、一个 JSON 特性清单（200 多条，全部 <code>passes: false</code>），然后做第一次 git 提交。</li><li>之后每个编码会话的固定开场：<code>pwd</code>，读 git log 和进度文件，读清单挑最高优先级未完成的一条，跑 <code>init.sh</code>，先做一次基本的端到端检查，再开始干活。</li><li>一次只做一个特性，做完用浏览器自动化验证，提交，更新进度文件。留下的代码要"可以合并到主干"。</li><li>对应修掉的失败：过早宣布胜利、半成品没记录、没测试就标完成、每次重新摸索怎么启动。</li></ul>
+<p>同一思路的大规模版本：2026 年 2 月 Anthropic 用 16 个并行 Claude Code 在 Docker 里写了一个约 10 万行 Rust 的 C 编译器。<code>while true</code> 循环不断开新会话，任务认领靠 git 里的锁文件，没有中央调度器，约 2000 个会话、不到 2 万美元。期间有一个 agent 跑了 <code>pkill -9 bash</code>。</p>
+<p><strong>Ralph Wiggum 循环</strong>（Geoffrey Huntley，2025-07）：<code>while :; do cat PROMPT.md | claude-code; done</code>。同一个 prompt，每轮全新上下文，一轮只做一件事，靠测试、类型检查、静态分析提供"背压"。只适合从零开始的项目。</p>
+<p><strong>生成者/评估者</strong>（Anthropic Labs，2026-03）：planner 把一两句话扩成产品规格，generator 按特性冲刺，evaluator 用 Playwright 像用户一样点。代价明确：同一个任务单 agent 20 分钟 9 美元，完整 harness 6 小时 200 美元，超过 20 倍。"当任务超出当前模型独立可靠完成的范围时才值得。"到 Opus 4.6 他们就删掉了冲刺机制，评估者只留最后一轮。</p>
+<p><strong>多代理的坑</strong>。Cognition《Don't Build Multi-Agents》（2025-06）：两条原则，共享完整轨迹而不只是消息；动作携带隐含决策，冲突的决策产生坏结果。例子是让两个子代理分别做 Flappy Bird 的背景和小鸟，拼不到一起。推荐单线程线性 agent，长任务用专门的压缩模型。Anthropic 的多代理研究系统则显示并行子代理在研究类任务上比单 Opus 4 强 90.2%，但 token 用量是聊天的 15 倍，"并行和专业化必须赚回协调成本"。经验法则：并行用于读和搜（结果可合并），不用于写同一份代码。</p>
+<p><strong>OpenAI 的仓库级 harness</strong>（2026-02 那篇博客的技术清单，适合已经在用 agent 写生产代码的团队）</p>
+<ul><li>上下文：约 100 行的 AGENTS.md 当目录；<code>docs/</code> 做知识库（设计文档含验证状态、架构地图、质量评级、执行计划含决策日志、技术债）；渐进披露。</li><li>机械反馈：固定分层 Types → Config → Repo → Service → Runtime → UI，只能向前依赖，横切关注点只能经 Providers 进入；用 Codex 自己写的自定义 linter 和结构化测试强制；linter 的报错文案直接写成给 agent 的修复指令。"强制不变量，不微管实现。"</li><li>感知：应用按 git worktree 可独立启动；Chrome DevTools Protocol 做 DOM 快照和截图；每个 worktree 一套临时可观测性栈，agent 用 LogQL 和 PromQL 查日志和指标。</li><li>维护自动化：文档园丁 agent；"黄金原则"加定期 GC 任务扫描偏差、开小型重构 PR 并自动合并（之前他们每周五花 20% 时间清 "AI slop"）；agent 对 agent 的代码审查循环。</li><li>合并哲学：最小阻塞门禁，"吞吐远超人类注意力时，纠错便宜，等待昂贵"。</li><li>核心信念："从 agent 的角度看，运行时拿不到的东西就不存在。"Google Docs、聊天记录、人脑里的知识对系统不可见。</li></ul>
+<hr>
+</section>
+<section id="s10"><h3><span class="eyebrow">第 9 课</span><span class="h3-text">把这些对照到你每天用的工具</span></h3>
+<p>Claude Code 的功能可以放进一个 2×2：</p>
+<div class="table-wrap"><table><thead><tr><th></th><th>建议性（模型可不听）</th><th>强制性</th></tr></thead><tbody><tr><td>常驻上下文</td><td>CLAUDE.md、<code>.claude/rules/</code>、auto memory</td><td>权限模式、沙箱、保护路径</td></tr><tr><td>按需加载或零上下文</td><td>skills（只常驻描述，1536 字符）、MCP（只常驻工具名，用到才加载 schema）、子代理（隔离窗口）</td><td>hooks（零上下文，exit 2 阻断）、worktree 隔离检查</td></tr></tbody></table></div>
+<p>值得记住的数字：工具输出上限 2.5 万 token；MCP 输出 1 万警告、2.5 万截断；CLAUDE.md 200 行；SKILL.md 500 行；默认 20 个并发子代理、3 层嵌套；auto mode 连续 3 次或累计 20 次拦截就退回人工。</p>
+<p>Codex CLI 的对应项：AGENTS.md 分层拼接、32 KiB 上限；<code>approval_policy</code>（on-request / never / 细粒度表）加 <code>sandbox_mode</code>（read-only / workspace-write / danger-full-access）；hooks 12 个事件、默认开启、exit 2 阻断；skills 列表占上下文 2%；子代理默认开；服务端 compaction。OpenAI 内部人士承认"Codex 模型是在 harness 存在的情况下训练的"，这解释了为什么同一模型在自家 harness 里分数更高，也解释了为什么换工具有时会退步。</p>
+<p>官方给的"什么时候用哪个"触发表（Claude Code 文档）：</p>
+<ul><li>同一个约定或命令错了两次 → 写进 CLAUDE.md</li><li>第三次粘贴同一套操作手册 → 做成 skill</li><li>某个旁支任务的输出淹没了对话 → 交给子代理</li><li>某件事必须每次都发生、不要问 → 写 hook</li><li>第二个仓库需要同样的配置 → 打包成 plugin</li><li>两次纠正都没用 → <code>/clear</code>，重写初始 prompt</li></ul>
+<p><strong>练习</strong>：打开你常用工具的配置目录，把现有的 CLAUDE.md / AGENTS.md / hooks / skills 填进上面的 2×2 表，看哪个格子是空的，想想为什么。</p>
+<hr>
+</section>
+<section id="s11"><h3><span class="eyebrow">第 10 课</span><span class="h3-text">心法与反模式</span></h3>
+<p><strong>心法</strong></p>
+<ul><li>失败是信号，不是让它"再努力点"。OpenAI："修复几乎从来不是 try harder"，而是问"缺了什么能力，怎么让它对 agent 既可见又可强制"。Hashimoto：每个错误只允许犯一次。</li><li>好 harness 与坏 harness（Daniel Miessler）：坏的是逐步说明书式的 prompt，试图比模型聪明；好的是环境和验证。</li><li>每个组件都是对"模型做不到"的假设，会过期。Amp 团队的检验问题：这段 harness 代码是在帮助 inspect、verify、recover、merge 模型的工作，还是在"照看昨天的模型"？新模型来了，先删不再承重的部分。</li><li>从最简单的方案开始，只在需要时增加复杂度。OpenAI 指南：先把单 agent 的能力榨干，分支逻辑复杂或工具重叠时才拆。</li><li>协同训练的现实：harness 里的补丁会迁移进下一代模型，但"模型和外部上下文、工具之间的接口"会留下。所以具体技巧要常更新，方法论不会过时。</li></ul>
+<p><strong>反模式清单</strong>（都有出处）</p>
+<ul><li>大杂烩提示和臃肿的 CLAUDE.md："强调的东西太多，就没有一条突出。"</li><li>工具过载：Vercel 把工具从 15 个砍到 2 个，成功率 80% → 100%。</li><li>多代理分散决策（Cognition 的 Flappy Bird）。</li><li>过早宣布胜利；改测试让它通过；自己给自己打分（分数会漂高）。</li><li>事后修改历史：破坏缓存，新账号直接 400。</li><li>系统提示里放时间戳、随机 id 等易变内容。</li><li>相信 prompt 里的"禁止"：仅靠 prompt 的工具访问控制会漏掉 4% 到 37% 的未授权调用；要拦就用 hook 或沙箱。</li><li>情绪化激励、威胁、小费：aider 实测降分。</li><li>一次 trial 定胜负：用 pass^k 看稳定性。</li><li>过时的配置文件：CLAUDE.md / AGENTS.md 没人维护，变成"陈旧规则的坟场"。给它指定 owner，像审代码一样审它的改动。</li></ul>
+<hr>
+</section>
+<section id="s12"><h3><span class="h3-text">推荐学习路径与资料</span></h3>
+<p><strong>一周路线</strong></p>
+<ul><li>第 1 天：读第 0 课和 Ball 的《How to Build an Agent》，跑通 <code>mini_harness.py</code>。</li><li>第 2 天：第 1、2 课，把四个工具各改坏一次再修好。</li><li>第 3 天：第 3、4 课，写 AGENTS.md，试拦截。</li><li>第 4 天：第 5、6 课，记录 token 和缓存命中，打开 <code>--require-tests</code>。</li><li>第 5 天：第 7 课，建 5 个任务，跑 3 次，改 harness 提高 pass^3。</li><li>第 6 天：读 Anthropic 长任务 harness 和 OpenAI harness engineering 两篇原文。</li><li>第 7 天：第 9、10 课，整理你日常工具的配置。</li></ul>
+<p><strong>必读原文</strong>（按推荐顺序）</p>
+<ol><li>Thorsten Ball, How to Build an Agent (2025-04-15) <a href="https://ampcode.com/how-to-build-an-agent" target="_blank" rel="noopener">https://ampcode.com/how-to-build-an-agent</a></li><li>Anthropic, Building effective agents (2024-12-19) <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">https://www.anthropic.com/engineering/building-effective-agents</a></li><li>Anthropic, Effective context engineering for AI agents (2025-09-29) <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents</a></li><li>Manus, Context Engineering for AI Agents (2025-07-18) <a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus" target="_blank" rel="noopener">https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus</a></li><li>Anthropic, Effective harnesses for long-running agents (2025-11-26) <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents</a></li><li>OpenAI, Harness engineering: leveraging Codex in an agent-first world (2026-02-11) <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener">https://openai.com/index/harness-engineering/</a></li><li>Mitchell Hashimoto, My AI Adoption Journey (2026-02-05) <a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noopener">https://mitchellh.com/writing/my-ai-adoption-journey</a></li><li>Anthropic, Harness design for long-running application development (2026-03-24) <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps" target="_blank" rel="noopener">https://www.anthropic.com/engineering/harness-design-long-running-apps</a></li><li>Anthropic, Demystifying evals for AI agents (2026-01-09) <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener">https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents</a></li><li>Birgitta Böckeler, Harness engineering for coding agent users (2026-04-02) <a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">https://martinfowler.com/articles/harness-engineering.html</a></li><li>SWE-agent 论文 arXiv 2405.15793；mini-swe-agent <a href="https://github.com/SWE-agent/mini-swe-agent" target="_blank" rel="noopener">https://github.com/SWE-agent/mini-swe-agent</a></li><li>Cognition, Don't Build Multi-Agents (2025-06-12) <a href="https://cognition.com/blog/dont-build-multi-agents" target="_blank" rel="noopener">https://cognition.com/blog/dont-build-multi-agents</a></li><li>HumanLayer, 12-Factor Agents <a href="https://github.com/humanlayer/12-factor-agents" target="_blank" rel="noopener">https://github.com/humanlayer/12-factor-agents</a></li><li>Terminal-Bench 2.0 论文 arXiv 2601.11868；Stop Comparing LLM Agents Without Disclosing the Harness, arXiv 2605.23950</li><li>Claude Code 文档（how-claude-code-works、best-practices、hooks、memory、sandboxing）<a href="https://code.claude.com/docs" target="_blank" rel="noopener">https://code.claude.com/docs</a> ；Codex 文档 <a href="https://developers.openai.com/codex" target="_blank" rel="noopener">https://developers.openai.com/codex</a></li><li>Claude API 文档（tool use、handling stop reasons、prompt caching、tool runner）<a href="https://platform.claude.com/docs" target="_blank" rel="noopener">https://platform.claude.com/docs</a></li><li>Lilian Weng, Harness Engineering for Self-Improvement (2026-07-04) <a href="https://lilianweng.github.io/posts/2026-07-04-harness/" target="_blank" rel="noopener">https://lilianweng.github.io/posts/2026-07-04-harness/</a></li><li>Simon Willison, How coding agents work (2026-03-16) <a href="https://simonwillison.net/guides/agentic-engineering-patterns/how-coding-agents-work/" target="_blank" rel="noopener">https://simonwillison.net/guides/agentic-engineering-patterns/how-coding-agents-work/</a></li><li>Latent Space, Is Harness Engineering real? (2026-03-05) <a href="https://www.latent.space/p/ainews-is-harness-engineering-real" target="_blank" rel="noopener">https://www.latent.space/p/ainews-is-harness-engineering-real</a></li></ol>
+<p><strong>关于数据来源的说明</strong>：教程中的数字均来自上述原文或论文。少数二手来源（Latent Space 播客里的 token 用量、第三方排行榜快照）已在文中注明性质。OpenAI 博客页面对爬虫返回 403，其作者（Ryan Lopopolo）与发布日期来自 InfoQ 和 Latent Space 的报道，正文引语来自代理抓取的页面文本。配套代码的工具层和 grader 已离线验证，与 Claude API 的端到端运行需要你自己配置 <code>ANTHROPIC_API_KEY</code> 后执行。</p>
+</section>
+</main>
+</div>
+
+</body>
+</html>
